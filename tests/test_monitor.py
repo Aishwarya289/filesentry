@@ -1,23 +1,36 @@
-import sys
 import os
-sys.path.append(os.path.abspath("."))  # Adds the project root to the module search path
-
-from filesentry import monitor  # Now it will work after adding __init__.py
-
 import tempfile
+from filesentry import monitor
 
-def test_compute_file_hash():
-    # Create a temporary file and write content to it
-    with tempfile.NamedTemporaryFile(delete=False) as temp:
-        temp.write(b'hello world')
-        temp_path = temp.name
 
-    # Get the hash of the temp file
-    result = monitor.compute_file_hash(temp_path)
+def test_calculate_file_hash():
+    # Create a temporary file with known content
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        tmp.write(b"test content")
+        tmp_path = tmp.name
 
-    # Ensure it's a valid hex string
-    assert isinstance(result, str)
-    assert len(result) == 64  # SHA-256 hash length
+    try:
+        # Call the function
+        result = monitor.calculate_file_hash(tmp_path)
 
-    # Clean up
-    os.remove(temp_path)
+        # Ensure it's a valid hex string of SHA-256 length
+        if not isinstance(result, str):
+            raise AssertionError("Result is not a string")
+        if len(result) != 64:
+            raise AssertionError("Hash length is not 64 characters")
+    finally:
+        os.remove(tmp_path)
+
+
+def test_monitor_directory():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        file_path = os.path.join(temp_dir, "testfile.txt")
+        with open(file_path, "w") as f:
+            f.write("initial content")
+
+        # Run the monitor function once
+        file_hashes = monitor.monitor_directory(temp_dir, run_once=True)
+
+        # Check if the file was detected
+        if file_path not in file_hashes:
+            raise AssertionError("Monitored file not detected")
