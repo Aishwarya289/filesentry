@@ -28,14 +28,13 @@ pipeline {
             }
         }
 
-        stage('Security Scan') {
-            steps {
-                echo ' Running Bandit security scan...'
-                sh 'pip install bandit'
-                sh 'bandit -r filesentry > bandit_report.txt'
-                archiveArtifacts artifacts: 'bandit_report.txt', allowEmptyArchive: true
-            }
-        }
+      stage('Security Scan') {
+    steps {
+        echo 'Running Bandit security scan...'
+        sh 'docker run --rm filesentry:latest bandit -r /app'
+    }
+}
+
 
         stage('Deploy') {
             steps {
