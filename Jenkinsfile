@@ -24,7 +24,6 @@ pipeline {
         stage('Code Quality') {
             steps {
                 echo ' (Placeholder) Running SonarCloud or code quality tool...'
-                // Replace with actual SonarCloud CLI command if configured
                 sh 'echo "SonarCloud scan would run here."'
             }
         }
